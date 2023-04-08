@@ -44,7 +44,10 @@ function move() {
             ;;
         # Flèche du bas
         "B")
-            if ((y < 20)); then
+            local -i f=$(( (y + 1) * xmax + x ))
+            if [ "${map:$f:1}" == "#" ]; then
+                y=$y
+            else
                 ((y++))
             fi
             ;;
