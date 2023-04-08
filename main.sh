@@ -26,7 +26,7 @@ function move() {
         # Flèche gauche
         "D")
             local -i f=$(( (x - 1) + (y * xmax) ))
-            echo -n "x: $x y: $y c: "${map:$f:1}" i: $f"
+            # echo -n "x: $x y: $y c: "${map:$f:1}" i: $f"
             if [ "${map:$f:1}" == "#" ]; then
                 x=$x
             else
@@ -35,7 +35,10 @@ function move() {
             ;;
         # Flèche droite
         "C")
-            if ((x < 30)); then
+            local -i f=$(( (x + 1) + (y * xmax) ))
+            if [ "${map:$f:1}" == "#" ]; then
+                x=$x
+            else
                 ((x++))
             fi
             ;;
