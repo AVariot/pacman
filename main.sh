@@ -53,7 +53,10 @@ function move() {
             ;;
         # Flèche du haut
         "A")
-            if (( y - 1 > 0 )); then
+            local -i f=$(( (y - 1) * xmax + x ))
+            if [ "${map:$f:1}" == "#" ]; then
+                y=$y
+            else
                 ((y--))
             fi
             ;;
