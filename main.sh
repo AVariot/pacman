@@ -43,6 +43,10 @@ function move() {
             if [ "${map:$f:1}" == "#" ]; then
                 x=$x
             else
+                if [ "${map:$f:1}" == "." ]; then
+                    ((point++))
+                    map="${map:0:f} ${map:f+1:500}"
+                fi;
                 ((x++))
             fi
             ;;
@@ -52,6 +56,10 @@ function move() {
             if [ "${map:$f:1}" == "#" ]; then
                 y=$y
             else
+                if [ "${map:$f:1}" == "." ]; then
+                    ((point++))
+                    map="${map:0:f} ${map:f+1:500}"
+                fi;
                 ((y++))
             fi
             ;;
@@ -61,6 +69,10 @@ function move() {
             if [ "${map:$f:1}" == "#" ]; then
                 y=$y
             else
+                if [ "${map:$f:1}" == "." ]; then
+                    ((point++))
+                    map="${map:0:f} ${map:f+1:500}"
+                fi;
                 ((y--))
             fi
             ;;
