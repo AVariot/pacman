@@ -12,7 +12,7 @@ declare -i y=1
 declare -i xmax=50
 declare -i ymax=10
 declare -i point=0
-declare -i pointmax=125
+declare -i pointmax=124
 declare -i xpoint=55
 declare -i ypoint=1
 declare -i posenemix=20
@@ -157,41 +157,75 @@ function print_point() {
 
 function end_condition() {
 
-    if [ "$point" = "$pointmax" ]; then
-        end=true
+    if [[ $point -gt $pointmax ]]; then
         win=1
     fi;
     if [ "$x" = "$posenemix" ] && [ "$y" = "$posenemiy" ] ; then
-        end=true
         lose=1
     fi;
 }
 
-# function end_screen() {
-# }
+function end_screen() {
+    if [ $win -eq "1" ]; then
+        clear
+        local nx=0
+        local ny=0
+        tput cup $ny $nx
+        echo -n "*****************************"
+        tput cup $((ny+1)) $nx
+        echo -n "*                           *"
+        tput cup $((ny+2)) $nx
+        echo -n "*           WIN             *"
+        tput cup $((ny+3)) $nx
+        echo -n "*                           *"
+        tput cup $((ny+4)) $nx
+        echo -n "*****************************"
+        tput cup $((ny+5)) $nx
+        echo -e "Do you want to play again?\n\tIf yes write y\n\tElse write n"
+        tput cup $((ny+8)) $nx
+        read -rsn1 response
+        if [ "$response" = "y" ]; then
+            tput cnorm
+            stty echo
+            exec bash "$0" "$@"
+        elif [ "$response" = "n" ]; then
+            tput cnorm
+            stty echo
+            exit 0
+        fi;
+    elif [ $win -eq "1" ]; then
+        clear ; echo "bjdlsdnfsknflsé" ; sleep 1
+        tput cnorm
+        stty echo
+        exit 0;
+    fi;
+}
 
 function main() {
 
     while [ "$end" = false ]; do
-        read -rsn1 key
-        if [[ "$key" == c ]]; then
-            tput cnorm
-            stty echo
+         end_condition
+        #  echo "$win $lose $point $pointmax"
+        if [ "$win" = "$lose" ] ; then
+            read -rsn1 key
+            if [[ "$key" == c ]]; then
+                tput cnorm
+                stty echo
+                clear
+                exit 0
+            fi;
             clear
-            exit 0
+            echo "$map"
+            print_point
+            move $key
+            first_enemie_deplacement
+            tput cup $y $x ; echo -e -n "\033[33mC\033[0m"
+            tput cup $posenemiy $posenemix ; echo "o"
+        else
+            end_screen
         fi;
-        clear
-        echo "$map"
-        print_point
-        move $key
-        first_enemie_deplacement
-        end_condition
-        tput cup $y $x ; echo -e -n "\033[33mC\033[0m"
-        tput cup $posenemiy $posenemix ; echo "o"
-        # sleep 1
-
+        # echo "---- $(end_screen)"
     done
-
     # Restauration des paramètres du terminal
     tput cnorm
     stty echo
