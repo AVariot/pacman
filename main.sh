@@ -15,20 +15,71 @@ declare -i point=0
 declare -i pointmax=125
 declare -i xpoint=55
 declare -i ypoint=1
+declare -i posenemix=20
+declare -i posenemiy=3
 declare map=$(cat map.txt)
-
 
 # Affichage du caractère initial
 echo "$map"
 tput cup $y $x
 echo -e -n "\033[33mC\033[0m"
+tput cup $posenemiy $posenemix
+echo -e -n "o"
 #############################
+
+function first_enemie_deplacement() {
+  local readonly direction=$((RANDOM % 4))
+#   local readonly direction=1
+
+  case $direction in
+    "0") # Haut
+        local -i f=$(( (posenemiy - 1) * xmax + posenemix ))
+        if [ "${map:$f:1}" == "#" ]; then
+            first_enemie_deplacement
+        else
+            posenemiy=$(expr $posenemiy - 1)
+        fi
+        return
+    ;;
+    "1") # Bas
+        local -i f=$(( (posenemiy + 1) * xmax + posenemix ))
+        if [ "${map:$f:1}" == "#" ]; then
+            first_enemie_deplacement
+        else
+            posenemiy=$(expr $posenemiy + 1)
+        fi
+        return
+    ;;
+    "2") # Gauche
+       local -i f=$(( (posenemix - 1) + (posenemiy * xmax) ))
+        if [ "${map:$f:1}" == "#" ]; then
+            first_enemie_deplacement
+        else
+            posenemix=$(expr $posenemix - 1)
+        fi
+        return
+    ;;
+    "3") # Droite
+       local -i f=$(( (posenemix + 1) + (posenemiy * xmax) ))
+        if [ "${map:$f:1}" == "#" ]; then
+            first_enemie_deplacement
+        else
+            posenemix=$(expr $posenemix + 1)
+        fi
+        return
+    ;;
+    *)
+        return
+    ;;
+    esac
+    return
+}
 
 function move() {
     key=$1
     case $key in
         # Flèche gauche
-        "D")
+        "a")
             local -i f=$(( (x - 1) + (y * xmax) ))
             if [ "${map:$f:1}" == "#" ]; then
                 x=$x
@@ -41,7 +92,7 @@ function move() {
             fi
             ;;
         # Flèche droite
-        "C")
+        "e")
             local -i f=$(( (x + 1) + (y * xmax) ))
             if [ "${map:$f:1}" == "#" ]; then
                 x=$x
@@ -54,7 +105,7 @@ function move() {
             fi
             ;;
         # Flèche du bas
-        "B")
+        "s")
             local -i f=$(( (y + 1) * xmax + x ))
             if [ "${map:$f:1}" == "#" ]; then
                 y=$y
@@ -67,7 +118,7 @@ function move() {
             fi
             ;;
         # Flèche du haut
-        "A")
+        "z")
             local -i f=$(( (y - 1) * xmax + x ))
             if [ "${map:$f:1}" == "#" ]; then
                 y=$y
@@ -83,12 +134,10 @@ function move() {
         *)
             ;;
     esac
-    tput cup $y $x
-    echo -e -n "\033[33mC\033[0m"
 }
 
 function print_point() {
-    tput cup  $ypoint $xpoint ; echo -e "------------"
+    tput cup  $ypoint $xpoint ; echo -e -n "------------"
     tput cup  $((ypoint+1)) $xpoint ; echo -e "-  Points: -"
     if [[ $(echo -n "$point" | wc -c) -eq 1 ]]; then
         tput cup  $((ypoint+2)) $xpoint ; echo -e -n "-     $point    -"
@@ -97,14 +146,12 @@ function print_point() {
     else
         tput cup  $((ypoint+2)) $xpoint ; echo -e -n "-     $point  -"
     fi;
-    tput cup  $((ypoint+3)) $xpoint ; echo -e "------------"
+    tput cup  $((ypoint+3)) $xpoint ; echo -e -n "------------"
 }
 
 function main() {
 
-    # Boucle principale
     while true; do
-        # Récupération de la touche enfoncée
         read -rsn1 key
         if [[ "$key" == c ]]; then
             tput cnorm
@@ -116,6 +163,11 @@ function main() {
         echo "$map"
         print_point
         move $key
+        first_enemie_deplacement
+        tput cup $y $x ; echo -e -n "\033[33mC\033[0m"
+        tput cup $posenemiy $posenemix ; echo "o"
+        # sleep 1
+
     done
 
     # Restauration des paramètres du terminal
