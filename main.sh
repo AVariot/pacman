@@ -11,6 +11,7 @@ declare -i x=1
 declare -i y=1
 declare -i xmax=50
 declare -i ymax=10
+declare -i point=0
 declare map=$(cat map.txt)
 
 
@@ -26,10 +27,13 @@ function move() {
         # Flèche gauche
         "D")
             local -i f=$(( (x - 1) + (y * xmax) ))
-            # echo -n "x: $x y: $y c: "${map:$f:1}" i: $f"
             if [ "${map:$f:1}" == "#" ]; then
                 x=$x
             else
+                if [ "${map:$f:1}" == "." ]; then
+                    ((point++))
+                    map="${map:0:f} ${map:f+1:500}"
+                fi;
                 ((x--))
             fi
             ;;
