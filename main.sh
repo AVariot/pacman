@@ -17,6 +17,9 @@ declare -i xpoint=55
 declare -i ypoint=1
 declare -i posenemix=20
 declare -i posenemiy=3
+declare end=false
+declare -i win=0
+declare -i lose=0
 declare map=$(cat map.txt)
 
 # Affichage du caractère initial
@@ -28,6 +31,7 @@ echo -e -n "o"
 #############################
 
 function first_enemie_deplacement() {
+
   local readonly direction=$((RANDOM % 4))
 #   local readonly direction=1
 
@@ -76,6 +80,7 @@ function first_enemie_deplacement() {
 }
 
 function move() {
+
     key=$1
     case $key in
         # Flèche gauche
@@ -137,6 +142,7 @@ function move() {
 }
 
 function print_point() {
+
     tput cup  $ypoint $xpoint ; echo -e -n "------------"
     tput cup  $((ypoint+1)) $xpoint ; echo -e "-  Points: -"
     if [[ $(echo -n "$point" | wc -c) -eq 1 ]]; then
@@ -149,9 +155,24 @@ function print_point() {
     tput cup  $((ypoint+3)) $xpoint ; echo -e -n "------------"
 }
 
+function end_condition() {
+
+    if [ "$point" = "$pointmax" ]; then
+        end=true
+        win=1
+    fi;
+    if [ "$x" = "$posenemix" ] && [ "$y" = "$posenemiy" ] ; then
+        end=true
+        lose=1
+    fi;
+}
+
+# function end_screen() {
+# }
+
 function main() {
 
-    while true; do
+    while [ "$end" = false ]; do
         read -rsn1 key
         if [[ "$key" == c ]]; then
             tput cnorm
@@ -164,6 +185,7 @@ function main() {
         print_point
         move $key
         first_enemie_deplacement
+        end_condition
         tput cup $y $x ; echo -e -n "\033[33mC\033[0m"
         tput cup $posenemiy $posenemix ; echo "o"
         # sleep 1
