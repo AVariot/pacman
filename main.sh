@@ -12,6 +12,9 @@ declare -i y=1
 declare -i xmax=50
 declare -i ymax=10
 declare -i point=0
+declare -i pointmax=125
+declare -i xpoint=55
+declare -i ypoint=1
 declare map=$(cat map.txt)
 
 
@@ -84,6 +87,18 @@ function move() {
     echo -e -n "\033[33mC\033[0m"
 }
 
+function print_point() {
+    tput cup  $ypoint $xpoint ; echo -e "------------"
+    tput cup  $((ypoint+1)) $xpoint ; echo -e "-  Points: -"
+    if [[ $(echo -n "$point" | wc -c) -eq 1 ]]; then
+        tput cup  $((ypoint+2)) $xpoint ; echo -e -n "-     $point    -"
+    elif [[ $(echo -n "$point" | wc -c) -eq 2 ]]; then
+        tput cup  $((ypoint+2)) $xpoint ; echo -e -n "-     $point   -"
+    else
+        tput cup  $((ypoint+2)) $xpoint ; echo -e -n "-     $point  -"
+    fi;
+    tput cup  $((ypoint+3)) $xpoint ; echo -e "------------"
+}
 
 function main() {
 
@@ -99,6 +114,7 @@ function main() {
         fi;
         clear
         echo "$map"
+        print_point
         move $key
     done
 
