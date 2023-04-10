@@ -1,6 +1,38 @@
 #!/bin/bash
 
 
+
+
+
+##### check ncurse
+
+#!/bin/bash
+
+if ! ldconfig -p | grep -q libncurses; then
+    echo "Can we install ncurses ? y or n"
+    read -rsn1 r
+    if [ "$r" = "n" ]; then
+        exit 0
+    fi;
+    if [[ -n $(command -v apt-get) ]]; then
+        sudo apt-get install libncurses5-dev libncursesw5-dev
+    elif [[ -n $(command -v yum) ]]; then
+        sudo yum install ncurses-devel
+    elif [[ -n $(command -v pacman) ]]; then
+        sudo pacman -S ncurses
+    else
+        echo "Cannot install ncurses. Package manager not found."
+        exit 1
+    fi
+else
+    clear
+    echo "Ncurses is already installed, lets go!" ; sleep 2 ; clear
+fi
+
+
+
+
+
 #############################
 # Initialisation de ncurses
 tput clear
@@ -21,13 +53,18 @@ declare end=false
 declare -i win=0
 declare -i lose=0
 declare map=$(cat map.txt)
+declare -i menu=-1
+
+################################
+
+OPTIONS=("PLAY" "LEAVE")
 
 # Affichage du caractère initial
-echo "$map"
-tput cup $y $x
-echo -e -n "\033[33mC\033[0m"
-tput cup $posenemiy $posenemix
-echo -e -n "o"
+# echo "$map"
+# tput cup $y $x
+# echo -e -n "\033[33mC\033[0m"
+# tput cup $posenemiy $posenemix
+# echo -e -n "o"
 #############################
 
 function first_enemie_deplacement() {
@@ -225,11 +262,61 @@ function end_screen() {
     fi;
 }
 
+function print_menu() {
+
+    select=0
+    local -i yp=10
+    while true; do
+        echo -e "\033[4m"
+            tput cup 5 0
+        echo "Click on 1 For Normal Execution and 2 for Error Execution and press a to confirm"
+            tput cup 7 0
+        echo "Click on c to exit"
+        echo -e "\033[0m"
+        # "#@" etant le nombre d'arg donner a un script ou a une fonction
+        for (( i=0; $i<${#OPTIONS[@]}; i++ )); do
+            tput cup $yp 2
+            if [ "$i" = "$select" ]; then
+                echo -e "\e[1m\e[7m${OPTIONS[$i]} \e[0m"
+            else
+                echo "${OPTIONS[$i]}"
+            fi
+            ((yp+=2))
+        done
+        read -s -n 1 key
+        if [[ "$key" == "c" ]]; then
+            clean_dir
+            tput cnorm
+            stty echo
+            clear
+            break
+        fi;
+        case "$key" in
+            "1") select=0 ; clear ;;
+            "2") select=1 ; clear ;;
+            "a")    if [ "$select" = "1" ]; then
+                        tput cnorm
+                        stty echo
+                        clear
+                        exit 0
+                        exit 0;
+                    else
+                        return 0
+                    fi;
+                ;;
+            *) ;;
+        esac
+        yp=10
+    done
+}
+
 function main() {
+
+    clear
+    print_menu
 
     while [ "$end" = false ]; do
          end_condition
-        #  echo "$win $lose $point $pointmax"
         if [ "$win" = "$lose" ] ; then
             read -rsn1 key
             if [[ "$key" == c ]]; then
@@ -256,7 +343,7 @@ function main() {
 }
 
 main
-
+# print_menu
 
 # -r : les entrées comme \n sont traitées littéralement plutôt que comme un retour à la ligne.
 # -s : affiche pas l input
